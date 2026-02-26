@@ -9,10 +9,12 @@ pytest-cache-files-*/
 .ruff_cache/
 .venv/
 venv/
+.tmp/
 
 # Manim / Manim Slides outputs
 media/
 .manim-slides/
+slides/
 
 # OS/editor noise
 .DS_Store

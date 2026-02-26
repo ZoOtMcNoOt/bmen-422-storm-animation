@@ -1,0 +1,12 @@
+name: storm
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.11,<3.14
+  - numpy>=1.26
+  - pytest>=8.0
+  - pip
+  - pip:
+      - manim>=0.18.0
+      - manim-slides[pyqt6]>=5.0.0
