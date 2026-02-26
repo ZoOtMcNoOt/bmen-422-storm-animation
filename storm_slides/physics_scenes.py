@@ -113,14 +113,14 @@ else:
 
             # --- Build five stage icons ---
             icons_data = [
-                ("λ",  "EM Waves",      THEME.accent_physics),
-                ("◎",  "Fourier Optics", THEME.accent_optics),
-                ("⬡",  "Microscope",     THEME.accent_instrument),
-                ("⊕",  "Algorithm",      THEME.accent_algorithm),
-                ("▦",  "Reconstruction", THEME.recon_teal),
+                ("λ",  "EM Waves",      THEME.accent_physics,     "Maxwell → Helmholtz"),
+                ("◎",  "Fourier Optics", THEME.accent_optics,     "NA, PSF & Abbe limit"),
+                ("⬡",  "Microscope",     THEME.accent_instrument, "Laser, dichroic, camera"),
+                ("⊕",  "Algorithm",      THEME.accent_algorithm,  "Gaussian MLE fitting"),
+                ("▦",  "Reconstruction", THEME.recon_teal,        "Super-res map assembly"),
             ]
             icons = VGroup()
-            for sym, label, color in icons_data:
+            for sym, label, color, _sub in icons_data:
                 icon = StageIcon(sym, label, color)
                 icons.add(icon)
             icons.arrange(RIGHT, buff=1.1).shift(DOWN * 0.3)
@@ -133,6 +133,17 @@ else:
                 ),
                 run_time=2.2,
             )
+
+            # Add brief subtitle under each icon
+            subtitles = VGroup()
+            for ic, (_s, _l, color, sub_text) in zip(icons, icons_data):
+                sub = Text(
+                    sub_text, font=FONT_SANS,
+                    font_size=LABEL_SIZE - 2, color=color,
+                )
+                sub.next_to(ic, DOWN, buff=0.15)
+                subtitles.add(sub)
+            self.play(FadeIn(subtitles), run_time=0.6)
             self.next_slide()
 
             # Connecting arrows with a slight curve
@@ -167,7 +178,7 @@ else:
                 font_size=BODY_SIZE - 4,
                 color=THEME.text_primary,
                 line_spacing=0.9,
-            ).to_edge(DOWN, buff=1.0)
+            ).to_edge(DOWN, buff=1.2)
             self.play(FadeIn(goal, shift=UP * 0.2), run_time=0.8)
             self.wait(0.5)
 
@@ -220,12 +231,18 @@ else:
             self.next_slide()
 
             # --- Scene B: Assumptions + simplification ---
+            narrator_ab = self.add_narrator_note(
+                "We combine these equations assuming a linear, source-free, harmonic medium…",
+                position="bottom",
+            )
+
             assumptions = Text(
                 "Assumptions:  linear medium  ·  source-free  ·  harmonic time  e^{-iωt}",
                 font=FONT_SANS,
                 font_size=CAPTION_SIZE - 2,
                 color=THEME.accent_optics,
             ).to_edge(DOWN, buff=1.6)
+            self.play(FadeOut(narrator_ab), run_time=0.25)
             self.play(FadeIn(assumptions, shift=UP * 0.1), run_time=0.7)
 
             # Morph to wave equation
@@ -265,6 +282,11 @@ else:
                 run_time=0.5,
             )
 
+            narrator_c = self.add_narrator_note(
+                "The Helmholtz equation governs all monochromatic wave propagation.",
+                position="bottom",
+            )
+
             helmholtz_lhs = MathTex(
                 r"\bigl(",
                 r"\nabla^{2}",
@@ -296,6 +318,7 @@ else:
             # --- Scene D: Animated travelling wave ---
             self.play(
                 FadeOut(eq_box), FadeOut(helmholtz_lhs), FadeOut(wavenumber),
+                FadeOut(narrator_c),
                 run_time=0.5,
             )
 
@@ -317,6 +340,13 @@ else:
                 color=THEME.wave_blue,
                 run_time=4.0,
             )
+
+            # Wave equation annotation
+            wave_label = MathTex(
+                r"E(x,t) = E_0 \sin(kx - \omega t)",
+                font_size=30, color=THEME.wave_blue,
+            ).shift(DOWN * 1.5)
+            self.play(FadeIn(wave_label, shift=UP * 0.1), run_time=0.5)
 
             outro = Text(
                 "Now we enter Fourier optics…",
@@ -465,10 +495,17 @@ else:
             dynamic_psf = always_redraw(psf_curve)
             self.play(FadeIn(na_label), Create(dynamic_psf), run_time=0.8)
 
+            # Step-by-step annotation during PSF sweep
+            psf_note = self.add_narrator_note(
+                "Lower NA → wider PSF → worse resolution",
+                color=THEME.accent_optics, position="bottom",
+            )
+
             # Sweep NA down
             self.play(na_tracker.animate.set_value(0.5), run_time=3.0, rate_func=rate_functions.smooth)
             # Sweep back up
             self.play(na_tracker.animate.set_value(1.4), run_time=2.0, rate_func=rate_functions.smooth)
+            self.play(FadeOut(psf_note), run_time=0.3)
             self.next_slide()
 
             # ---- Scene D: Resolution equation ----
@@ -497,6 +534,14 @@ else:
                 color=THEME.accent_optics,
             )
             self.play(Create(eq_box.box), FadeIn(eq_box.label_mob), run_time=0.7)
+
+            # Physical meaning note
+            meaning = Text(
+                "Two objects closer than ~243 nm appear as one blob",
+                font=FONT_SANS, font_size=CAPTION_SIZE - 2,
+                color=THEME.text_muted, slant="ITALIC",
+            ).to_edge(DOWN, buff=0.75)
+            self.play(FadeIn(meaning, shift=UP * 0.1), run_time=0.5)
             self.wait(0.5)
 
     # ==================================================================
@@ -516,6 +561,11 @@ else:
             self.add_citations("[1][2]")
 
             # --- Scene A: Conventional — all emitters on ---
+            narrator_conv = self.add_narrator_note(
+                "In conventional fluorescence, all molecules emit simultaneously.",
+                position="bottom",
+            )
+
             conv_label = Text(
                 "Conventional fluorescence — all emitters ON",
                 font=FONT_SANS,
@@ -553,7 +603,7 @@ else:
             self.next_slide()
 
             # --- Scene B: STORM — sparse activation ---
-            self.play(FadeOut(all_fluors), FadeOut(conv_label), FadeOut(overlap_note), run_time=0.5)
+            self.play(FadeOut(all_fluors), FadeOut(conv_label), FadeOut(overlap_note), FadeOut(narrator_conv), run_time=0.5)
 
             storm_label = Text(
                 "STORM — only 3–5 emitters ON per frame",
@@ -563,9 +613,15 @@ else:
             ).to_edge(UP, buff=2.2)
             self.play(FadeIn(storm_label), run_time=0.4)
 
+            # Narrator note for STORM frames
+            narrator_storm = self.add_narrator_note(
+                "Each frame: activate random subset → fit each isolated PSF → record position",
+                position="bottom",
+            )
+
             # Show several "frames" with sparse activation
             frame_counter = Text("Frame 1", font=FONT_SANS, font_size=CAPTION_SIZE, color=THEME.text_muted)
-            frame_counter.to_corner(UP + RIGHT, buff=0.5).shift(DOWN * 1.0)
+            frame_counter.to_corner(DOWN + RIGHT, buff=0.5).shift(UP * 1.2)
             self.play(FadeIn(frame_counter), run_time=0.3)
 
             accumulated_dots = VGroup()
@@ -626,6 +682,7 @@ else:
                 )
                 self.play(FadeOut(frame_glows), FadeOut(fitting_xs), run_time=0.25)
 
+            self.play(FadeOut(narrator_storm), run_time=0.25)
             result_note = Text(
                 "Accumulate localisations → super-resolution map!",
                 font=FONT_SANS,

@@ -177,6 +177,46 @@ if MANIM_AVAILABLE:
             self._persistent.extend([pill, badge])
             return grp
 
+        # ----- narrator note (step-by-step explanatory text) -----
+
+        def add_narrator_note(
+            self,
+            text: str,
+            color: str | None = None,
+            position: str = "left",
+            run_time: float = 0.5,
+        ) -> Text:
+            """Show a step-by-step explanatory note in a safe zone.
+
+            Parameters
+            ----------
+            text : str
+                The note content. Kept short (1-2 lines).
+            color : str, optional
+                Override colour; defaults to ``THEME.text_muted``.
+            position : str
+                ``"left"`` (default) places it left-aligned below the header.
+                ``"bottom"`` places it just above the progress bar.
+            run_time : float
+                Fade-in duration.
+
+            Returns the Text mobject so the caller can fade it out later.
+            """
+            note = Text(
+                text,
+                font=FONT_SANS,
+                font_size=CAPTION_SIZE - 2,
+                color=color or THEME.text_muted,
+                slant="ITALIC",
+                line_spacing=0.85,
+            )
+            if position == "bottom":
+                note.to_edge(DOWN, buff=0.85)
+            else:
+                note.to_edge(LEFT, buff=0.6).shift(UP * 1.2)
+            self.play(FadeIn(note, shift=UP * 0.1), run_time=run_time)
+            return note
+
         # ----- body caption -----
 
         def add_body_caption(self, text: str, color: str | None = None) -> Text:
@@ -235,6 +275,9 @@ else:  # no-op fallback for non-Manim environments
             return None
 
         def add_citations(self, refs: str) -> None:
+            return None
+
+        def add_narrator_note(self, text: str, color: str | None = None, position: str = "left", run_time: float = 0.5) -> None:
             return None
 
         def add_body_caption(self, text: str, color: str | None = None) -> None:

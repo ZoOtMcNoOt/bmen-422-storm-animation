@@ -138,9 +138,16 @@ else:
                 "3. Estimate\nprecision σ",
                 "4. Accumulate\nsuper-res map",
             ]
+            stage_descs = [
+                "Threshold local maxima\nabove background",
+                "Maximum-likelihood\n2D Gaussian fit",
+                "σ_loc from photon\ncount & background",
+                "Overlay all fitted\npositions on grid",
+            ]
 
             boxes = VGroup()
             box_labels = VGroup()
+            box_descs = VGroup()
             y_row = UP * 0.3
             for i, (color, title) in enumerate(zip(stage_colors, stage_titles)):
                 box = RoundedRectangle(
@@ -152,6 +159,14 @@ else:
                 boxes.add(box)
                 box_labels.add(label)
 
+                desc = Text(
+                    stage_descs[i], font=FONT_SANS,
+                    font_size=LABEL_SIZE - 3, color=THEME.text_muted,
+                    line_spacing=0.8,
+                )
+                desc.next_to(box, DOWN, buff=0.12)
+                box_descs.add(desc)
+
             arrows = VGroup()
             for i in range(3):
                 arr = Arrow(
@@ -161,9 +176,9 @@ else:
                 )
                 arrows.add(arr)
 
-            # Animate sequentially
+            # Animate sequentially with descriptions
             for i in range(4):
-                anims = [GrowFromCenter(boxes[i]), FadeIn(box_labels[i])]
+                anims = [GrowFromCenter(boxes[i]), FadeIn(box_labels[i]), FadeIn(box_descs[i])]
                 if i > 0:
                     anims.append(Create(arrows[i - 1]))
                 self.play(*anims, run_time=0.55)
@@ -234,6 +249,17 @@ else:
             )
             self.play(FadeIn(fit_label_text), run_time=0.3)
 
+            # Annotation: σ_PSF ring and center label
+            sigma_label = MathTex(
+                r"\sigma_{\text{PSF}}",
+                font_size=24, color=THEME.psf_cyan,
+            ).next_to(contours[1], RIGHT, buff=0.1)
+            center_label = MathTex(
+                r"(x_0, y_0)",
+                font_size=24, color=THEME.accent_algorithm,
+            ).next_to(fit_dot, UP + RIGHT, buff=0.1)
+            self.play(FadeIn(sigma_label), FadeIn(center_label), run_time=0.4)
+
             # --- Precision equation ---
             precision_eq = MathTex(
                 r"\sigma_{ \text{loc} }",
@@ -247,8 +273,8 @@ else:
             precision_eq[3].set_color(THEME.accent_alert)
 
             prec_note = Text(
-                "σ_PSF / √N dominates — more photons = better precision",
-                font=FONT_SANS, font_size=CAPTION_SIZE, color=THEME.text_muted,
+                "Collecting 400 photons → ~15 nm precision (10× below diffraction limit!)",
+                font=FONT_SANS, font_size=CAPTION_SIZE, color=THEME.accent_algorithm,
             ).next_to(precision_eq, DOWN, buff=0.15)
 
             self.play(Write(precision_eq), run_time=1.0)
@@ -290,7 +316,7 @@ else:
             ]
 
             chart_groups = VGroup()
-            x_centers = [-4.2, 0.0, 4.2]
+            x_centers = [-3.8, 0.0, 3.8]
 
             for idx, (title, xlabels, rmse_vals, color) in enumerate(sweep_data):
                 x_c = x_centers[idx]
@@ -302,7 +328,7 @@ else:
 
                 # Bars
                 max_rmse = 45.0
-                bar_width = 0.55
+                bar_width = 0.50
                 bars = VGroup()
                 value_labels = VGroup()
                 x_labels_grp = VGroup()
@@ -330,13 +356,21 @@ else:
                 # y-axis label
                 y_label = Text("RMSE (nm)", font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_muted)
                 y_label.rotate(PI / 2)
-                y_label.move_to(np.array([x_c - 1.6, y_base + 1.0, 0]))
+                y_label.move_to(np.array([x_c - 1.45, y_base + 1.0, 0]))
 
                 chart_group = VGroup(chart_title, bars, value_labels, x_labels_grp, y_label)
                 chart_groups.add(chart_group)
 
-            # Animate each chart
-            for cg in chart_groups:
+            # Per-chart takeaway texts
+            chart_insights = [
+                "4× more photons ≈ halves localisation error",
+                "High density causes PSF overlap → false localisations",
+                "Even 0.5 nm/frame drift degrades RMSE by ~40 %",
+            ]
+
+            # Animate each chart with per-chart insight
+            prev_insight = None
+            for i, cg in enumerate(chart_groups):
                 title_mob = cg[0]
                 bars_mob = cg[1]
                 vals_mob = cg[2]
@@ -350,11 +384,25 @@ else:
                 )
                 self.play(FadeIn(vals_mob), FadeIn(xlabs_mob), run_time=0.3)
 
+                # Per-chart narrator insight
+                insight_note = Text(
+                    chart_insights[i],
+                    font=FONT_SANS, font_size=LABEL_SIZE - 1,
+                    color=THEME.text_muted, slant="ITALIC",
+                ).to_edge(DOWN, buff=0.6)
+                if prev_insight is not None:
+                    self.play(FadeOut(prev_insight), run_time=0.15)
+                self.play(FadeIn(insight_note, shift=UP * 0.08), run_time=0.35)
+                prev_insight = insight_note
+
             self.next_slide()
 
-            # Key insight
+            # Final insight
+            if prev_insight is not None:
+                self.play(FadeOut(prev_insight), run_time=0.2)
             insight = Text(
-                "Fewer photons → worse RMSE  |  Denser emitters → more overlap\nDrift → systematic error",
+                "Photon budget is the dominant factor — optimise laser power & dye brightness first.\n"
+                "Correct drift with fiducial markers; keep density below overlap threshold.",
                 font=FONT_SANS,
                 font_size=CAPTION_SIZE,
                 color=THEME.text_muted,
@@ -378,6 +426,12 @@ else:
                 accent_color=THEME.psf_cyan,
             )
             self.add_citations("[3][4]")
+
+            # Narrator: astigmatism concept
+            narrator_astig = self.add_narrator_note(
+                "A cylindrical lens breaks rotational symmetry — the PSF becomes elliptical.",
+                position="bottom",
+            )
 
             # --- Scene A: z-dependent ellipses ---
             z_vals = [-400, -200, 0, 200, 400]
@@ -407,6 +461,7 @@ else:
                 run_time=1.5,
             )
             self.play(FadeIn(z_labels), run_time=0.5)
+            self.play(FadeOut(narrator_astig), run_time=0.2)
             self.next_slide()
 
             # --- Scene B: Calibration curve ---
@@ -458,6 +513,20 @@ else:
             cross_label = Text("focal plane", font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.emission_green)
             cross_label.next_to(cross_dot, UP, buff=0.1)
             self.play(FadeIn(cross_dot), FadeIn(cross_label), run_time=0.4)
+
+            # Annotation: dashed lines showing measurement → z lookup
+            measure_z = 150
+            wx_at_z = 1.0 + 1.2 * np.exp(-((measure_z + 200) / 200) ** 2) - 0.3 * np.exp(-((measure_z - 200) / 200) ** 2) + 0.3
+            wy_at_z = 1.0 - 0.3 * np.exp(-((measure_z + 200) / 200) ** 2) + 1.2 * np.exp(-((measure_z - 200) / 200) ** 2) + 0.3
+            pt_wx = cal_axes.c2p(measure_z, wx_at_z)
+            pt_wy = cal_axes.c2p(measure_z, wy_at_z)
+            pt_base = cal_axes.c2p(measure_z, 0)
+            dashed_v = DashedLine(pt_base, np.array([pt_wx[0], max(pt_wx[1], pt_wy[1]), 0]), color=THEME.text_muted, stroke_width=1.5)
+            measure_label = Text(
+                "measured z", font=FONT_SANS,
+                font_size=LABEL_SIZE - 3, color=THEME.text_highlight,
+            ).next_to(dashed_v, RIGHT, buff=0.08)
+            self.play(Create(dashed_v), FadeIn(measure_label), run_time=0.5)
 
             note = Text(
                 "Measure w_x/w_y ratio → look up z from calibration",
@@ -565,6 +634,42 @@ else:
                 run_time=1.2,
             )
 
+            # Scale bar annotations
+            scale_left = Line(
+                left_border.get_corner(DOWN + LEFT) + UP * 0.3 + RIGHT * 0.3,
+                left_border.get_corner(DOWN + LEFT) + UP * 0.3 + RIGHT * 1.3,
+                color=THEME.text_highlight, stroke_width=2.5,
+            )
+            scale_left_label = Text(
+                "~250 nm", font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_highlight,
+            ).next_to(scale_left, UP, buff=0.05)
+
+            scale_right = Line(
+                right_border.get_corner(DOWN + LEFT) + UP * 0.3 + RIGHT * 0.3,
+                right_border.get_corner(DOWN + LEFT) + UP * 0.3 + RIGHT * 1.3,
+                color=THEME.text_highlight, stroke_width=2.5,
+            )
+            scale_right_label = Text(
+                "~20 nm", font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_highlight,
+            ).next_to(scale_right, UP, buff=0.05)
+
+            self.play(
+                Create(scale_left), FadeIn(scale_left_label),
+                Create(scale_right), FadeIn(scale_right_label),
+                run_time=0.5,
+            )
+
+            # Structure labels
+            fiber_label = Text(
+                "microtubule filaments", font=FONT_SANS,
+                font_size=LABEL_SIZE - 2, color=THEME.emission_green, slant="ITALIC",
+            ).next_to(left_border, DOWN, buff=0.08).shift(LEFT * 0.5)
+            cluster_label = Text(
+                "receptor clusters", font=FONT_SANS,
+                font_size=LABEL_SIZE - 2, color=THEME.psf_cyan, slant="ITALIC",
+            ).next_to(right_border, DOWN, buff=0.08).shift(RIGHT * 0.5)
+            self.play(FadeIn(fiber_label), FadeIn(cluster_label), run_time=0.4)
+
             takeaway = Text(
                 "~20 nm resolution reveals sub-cellular architecture invisible at ~250 nm",
                 font=FONT_SANS, font_size=CAPTION_SIZE, color=THEME.text_muted,
@@ -604,36 +709,43 @@ else:
             ]
 
             left_col = VGroup()
-            x_left = -3.5
+            x_left = -3.6
             for i, (title, desc) in enumerate(limit_items):
                 card = RoundedRectangle(
-                    corner_radius=0.1, width=5.5, height=0.95,
+                    corner_radius=0.1, width=5.0, height=0.85,
                     color=THEME.accent_alert, fill_opacity=0.08, stroke_width=1.5,
-                ).move_to(np.array([x_left, 1.2 - i * 1.0, 0]))
+                ).move_to(np.array([x_left, 1.1 - i * 1.15, 0]))
                 t = Text(title, font=FONT_SANS, font_size=LABEL_SIZE + 2, color=THEME.accent_alert)
                 d = Text(desc, font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_muted)
-                t.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(UP * 0.15)
-                d.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(DOWN * 0.2)
+                t.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(UP * 0.13)
+                d.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(DOWN * 0.18)
                 left_col.add(VGroup(card, t, d))
 
             right_col = VGroup()
-            x_right = 3.5
+            x_right = 3.6
             for i, (title, desc) in enumerate(frontier_items):
                 card = RoundedRectangle(
-                    corner_radius=0.1, width=5.5, height=0.95,
+                    corner_radius=0.1, width=5.0, height=0.85,
                     color=THEME.recon_teal, fill_opacity=0.08, stroke_width=1.5,
-                ).move_to(np.array([x_right, 1.2 - i * 1.0, 0]))
+                ).move_to(np.array([x_right, 1.1 - i * 1.15, 0]))
                 t = Text(title, font=FONT_SANS, font_size=LABEL_SIZE + 2, color=THEME.recon_teal)
                 d = Text(desc, font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_muted)
-                t.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(UP * 0.15)
-                d.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(DOWN * 0.2)
+                t.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(UP * 0.13)
+                d.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(DOWN * 0.18)
                 right_col.add(VGroup(card, t, d))
 
             # Column headers
             lim_header = Text("Current Limitations", font=FONT_SANS, font_size=BODY_SIZE - 2, color=THEME.accent_alert)
-            lim_header.move_to(np.array([x_left, 2.1, 0]))
+            lim_header.move_to(np.array([x_left, 2.0, 0]))
             front_header = Text("Research Frontier", font=FONT_SANS, font_size=BODY_SIZE - 2, color=THEME.recon_teal)
-            front_header.move_to(np.array([x_right, 2.1, 0]))
+            front_header.move_to(np.array([x_right, 2.0, 0]))
+
+            # Column separator line
+            col_sep = Line(
+                UP * 2.3, DOWN * 2.7,
+                color=THEME.text_muted, stroke_width=1.0, stroke_opacity=0.35,
+            )
+            self.add(col_sep)
 
             self.play(FadeIn(lim_header), run_time=0.3)
             for card_group in left_col:
@@ -663,16 +775,16 @@ else:
             )
 
             checks = [
-                "Maxwell → wave equation → Helmholtz (EM foundation)",
-                "Fourier optics: NA-limited pupil, PSF, Abbe limit",
-                "Temporal sparsity & photoswitching mechanism",
-                "Microscope hardware: objective, dichroic, filters, camera",
-                "Poisson camera model & photon-counting statistics",
-                "Gaussian MLE localization & precision formula",
-                "Monte Carlo simulator: photon, density, drift sweeps",
-                "3D STORM via astigmatic PSF & z-calibration",
-                "Biological examples: filaments & receptor clusters",
-                "Limitations and active research directions",
+                "Maxwell → Helmholtz — EM foundation for wave propagation",
+                "Fourier optics — NA truncates frequencies; d ≈ λ/2NA ≈ 243 nm",
+                "Temporal sparsity — sparse blinking isolates single emitters",
+                "Microscope hardware — NA ≥ 1.4 objective, dichroic, sCMOS",
+                "Poisson camera model — shot noise dominates at low photon counts",
+                "Gaussian MLE fitting — σ_loc ≈ σ_PSF/√N → ~15 nm at 400 photons",
+                "Monte Carlo simulator — photon budget is the dominant factor",
+                "3D STORM — cylindrical lens encodes z into PSF ellipticity",
+                "Biological examples — ~250 nm → ~20 nm resolves filaments & clusters",
+                "Limitations & frontier — photobleaching, density, drift vs new probes & DL",
             ]
 
             row_group = VGroup()
@@ -703,7 +815,7 @@ else:
 
             # Final message
             closing = Text(
-                "Complete STORM pipeline demonstrated end-to-end.",
+                "From Maxwell's equations to 20 nm resolution — the complete STORM pipeline.",
                 font=FONT_SANS, font_size=BODY_SIZE,
                 color=THEME.emission_green,
             ).to_edge(DOWN, buff=0.6)

@@ -194,6 +194,12 @@ else:
             exc_label = Text("excitation", font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.excitation_violet)
             exc_label.next_to(exc_1, UP, buff=0.08)
 
+            # Narrator: excitation beam description
+            narrator_exc = self.add_narrator_note(
+                "Laser excites fluorophores at λ = 405–647 nm",
+                color=THEME.excitation_violet, position="bottom",
+            )
+
             self.play(
                 Create(exc_1), FadeIn(exc_label),
                 run_time=0.6,
@@ -206,6 +212,12 @@ else:
                 self.play(Flash(f, color=THEME.emission_green, flash_radius=0.2, run_time=0.15))
 
             # --- Emission beam (green): sample → objective → dichroic(transmit) → filter → camera ---
+            self.play(FadeOut(narrator_exc), run_time=0.2)
+            narrator_em = self.add_narrator_note(
+                "Stokes-shifted emission passes through dichroic to camera",
+                color=THEME.emission_green, position="bottom",
+            )
+
             em_1 = Arrow(
                 sample_rect.get_left(), obj_lens.get_right(),
                 buff=0.08, color=THEME.emission_green, stroke_width=3.5,
@@ -243,6 +255,7 @@ else:
             for r, c in [(1, 2), (2, 3), (3, 1)]:
                 camera.highlight_pixel(r, c, THEME.emission_green, 0.7)
             self.play(Indicate(camera, color=THEME.emission_green, scale_factor=1.05), run_time=0.5)
+            self.play(FadeOut(narrator_em), run_time=0.2)
             self.next_slide()
 
             # --- Scene B: Photoswitching energy levels ---
@@ -302,10 +315,38 @@ else:
             rec_lab = Text("k_on (thiol)", font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.accent_optics)
             rec_lab.next_to(recover_arrow, RIGHT, buff=0.08)
 
-            self.play(Create(excite_arrow), FadeIn(ex_label), run_time=0.5)
-            self.play(Create(emit_arrow), FadeIn(em_lab), run_time=0.5)
-            self.play(Create(dark_arrow), FadeIn(dark_lab), run_time=0.5)
-            self.play(Create(recover_arrow), FadeIn(rec_lab), run_time=0.5)
+            # Animate transitions with brief notes for each
+            energy_note_1 = Text(
+                "Photon absorbed → electron promoted",
+                font=FONT_SANS, font_size=LABEL_SIZE - 2,
+                color=THEME.excitation_violet, slant="ITALIC",
+            ).to_edge(DOWN, buff=0.85)
+            self.play(Create(excite_arrow), FadeIn(ex_label), FadeIn(energy_note_1), run_time=0.5)
+
+            energy_note_2 = Text(
+                "Relaxation emits a fluorescence photon",
+                font=FONT_SANS, font_size=LABEL_SIZE - 2,
+                color=THEME.emission_green, slant="ITALIC",
+            ).to_edge(DOWN, buff=0.85)
+            self.play(FadeOut(energy_note_1), run_time=0.15)
+            self.play(Create(emit_arrow), FadeIn(em_lab), FadeIn(energy_note_2), run_time=0.5)
+
+            energy_note_3 = Text(
+                "Intersystem crossing → dark (off) state",
+                font=FONT_SANS, font_size=LABEL_SIZE - 2,
+                color=THEME.accent_alert, slant="ITALIC",
+            ).to_edge(DOWN, buff=0.85)
+            self.play(FadeOut(energy_note_2), run_time=0.15)
+            self.play(Create(dark_arrow), FadeIn(dark_lab), FadeIn(energy_note_3), run_time=0.5)
+
+            energy_note_4 = Text(
+                "Thiol-mediated recovery → ground state",
+                font=FONT_SANS, font_size=LABEL_SIZE - 2,
+                color=THEME.accent_optics, slant="ITALIC",
+            ).to_edge(DOWN, buff=0.85)
+            self.play(FadeOut(energy_note_3), run_time=0.15)
+            self.play(Create(recover_arrow), FadeIn(rec_lab), FadeIn(energy_note_4), run_time=0.5)
+            self.play(FadeOut(energy_note_4), run_time=0.2)
 
             note = Text(
                 "Stochastic switching ensures only a few\nemitters are ON per acquisition frame.",
@@ -396,6 +437,12 @@ else:
             bg_label.next_to(poisson_eq[5], DOWN, buff=0.15)
             self.play(FadeIn(sig_label), FadeIn(bg_label), run_time=0.5)
 
+            # Narrator: explain Poisson model
+            narrator_poisson = self.add_narrator_note(
+                "Each pixel independently draws from a Poisson distribution.",
+                position="bottom",
+            )
+
             # Build histogram bars
             hist_axes = Axes(
                 x_range=[0, 12, 2],
@@ -442,6 +489,21 @@ else:
                 stroke_width=2.5,
             )
             self.play(Create(pmf_curve), run_time=0.8)
+
+            # Histogram peak annotation
+            peak_label = Text(
+                "Peak at λ = 5 photons/pixel",
+                font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.psf_cyan,
+            )
+            peak_label.next_to(bars[5], UP, buff=0.2).shift(RIGHT * 0.3)
+            peak_arrow = Arrow(
+                peak_label.get_bottom(), bars[5].get_top() + UP * 0.05,
+                buff=0.05, stroke_width=2, color=THEME.psf_cyan,
+                max_tip_length_to_length_ratio=0.2,
+            )
+            self.play(FadeIn(peak_label), Create(peak_arrow), run_time=0.5)
+
+            self.play(FadeOut(narrator_poisson), run_time=0.2)
             self.next_slide()
 
             # --- Scene C: SNR equation ---
@@ -450,7 +512,7 @@ else:
                 r"=",
                 r"\frac{N_{\text{signal} } }{\sqrt{N_{\text{signal} } + N_{\text{bg} } } }",
                 font_size=42, color=THEME.text_primary,
-            ).to_edge(DOWN, buff=1.2)
+            ).to_edge(DOWN, buff=1.5)
 
             snr_box = EquationBox(snr_eq, label="Signal-to-noise", color=THEME.accent_instrument)
             self.play(Write(snr_eq), run_time=0.8)
@@ -461,6 +523,6 @@ else:
                 font=FONT_SANS,
                 font_size=CAPTION_SIZE,
                 color=THEME.text_muted,
-            ).to_edge(DOWN, buff=0.5)
+            ).to_edge(DOWN, buff=0.6)
             self.play(FadeIn(takeaway), run_time=0.5)
             self.wait(0.5)
