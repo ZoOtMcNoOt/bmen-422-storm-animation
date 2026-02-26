@@ -181,7 +181,7 @@ else:
                 max_tip_length_to_length_ratio=0.1,
             )
             exc_2 = Arrow(
-                dichroic.get_center() + DOWN * 0.1, obj_lens.get_right() + RIGHT * 0.1,
+                dichroic.get_center(), obj_lens.get_right() + RIGHT * 0.1,
                 buff=0.08, color=THEME.excitation_violet, stroke_width=4,
                 max_tip_length_to_length_ratio=0.1,
             )

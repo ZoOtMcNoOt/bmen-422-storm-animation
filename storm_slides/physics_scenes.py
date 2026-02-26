@@ -407,7 +407,7 @@ else:
                 blocked_dots.add(d)
 
             blocked_label = Text("blocked", font=FONT_SANS, font_size=LABEL_SIZE, color=THEME.accent_alert)
-            blocked_label.next_to(blocked_dots, RIGHT, buff=0.2)
+            blocked_label.next_to(pupil, RIGHT, buff=1.5)
 
             self.play(FadeIn(blocked_dots), FadeIn(blocked_label), run_time=0.8)
             note = MathTex(

@@ -354,10 +354,11 @@ else:
 
             # Key insight
             insight = Text(
-                "Fewer photons → worse RMSE  |  Denser emitters → more overlap  |  Drift → systematic error",
+                "Fewer photons → worse RMSE  |  Denser emitters → more overlap\nDrift → systematic error",
                 font=FONT_SANS,
                 font_size=CAPTION_SIZE,
                 color=THEME.text_muted,
+                line_spacing=0.9,
             ).to_edge(DOWN, buff=0.6)
             self.play(FadeIn(insight, shift=UP * 0.1), run_time=0.6)
             self.wait(0.5)
@@ -493,8 +494,9 @@ else:
             # Blurry filaments — thick lines
             blurry_fibers = VGroup()
             for _ in range(8):
-                x0, y0 = rng.uniform(-5.2, -1.5), rng.uniform(-2.0, 1.8)
+                x0, y0 = rng.uniform(-5.4, -2.0), rng.uniform(-2.0, 1.8)
                 x1, y1 = x0 + rng.uniform(1.0, 2.0), y0 + rng.uniform(-0.6, 0.6)
+                x1 = min(x1, -1.1)  # clamp to panel right edge
                 blurry_fibers.add(
                     Line([x0, y0, 0], [x1, y1, 0],
                          color=THEME.emission_green, stroke_width=12, stroke_opacity=0.25)
@@ -518,7 +520,7 @@ else:
             rng2 = np.random.default_rng(5)  # same seed = same structure
             sharp_fibers = VGroup()
             for _ in range(8):
-                x0, y0 = rng2.uniform(-5.2, -1.5), rng2.uniform(-2.0, 1.8)
+                x0, y0 = rng2.uniform(-5.4, -2.0), rng2.uniform(-2.0, 1.8)
                 x1, y1 = x0 + rng2.uniform(1.0, 2.0), y0 + rng2.uniform(-0.6, 0.6)
                 # Offset to right panel
                 offset = np.array([6.6, 0, 0])
@@ -605,26 +607,26 @@ else:
             x_left = -3.5
             for i, (title, desc) in enumerate(limit_items):
                 card = RoundedRectangle(
-                    corner_radius=0.1, width=5.5, height=0.75,
+                    corner_radius=0.1, width=5.5, height=0.95,
                     color=THEME.accent_alert, fill_opacity=0.08, stroke_width=1.5,
                 ).move_to(np.array([x_left, 1.2 - i * 1.0, 0]))
                 t = Text(title, font=FONT_SANS, font_size=LABEL_SIZE + 2, color=THEME.accent_alert)
                 d = Text(desc, font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_muted)
-                t.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(UP * 0.1)
-                d.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(DOWN * 0.15)
+                t.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(UP * 0.15)
+                d.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(DOWN * 0.2)
                 left_col.add(VGroup(card, t, d))
 
             right_col = VGroup()
             x_right = 3.5
             for i, (title, desc) in enumerate(frontier_items):
                 card = RoundedRectangle(
-                    corner_radius=0.1, width=5.5, height=0.75,
+                    corner_radius=0.1, width=5.5, height=0.95,
                     color=THEME.recon_teal, fill_opacity=0.08, stroke_width=1.5,
                 ).move_to(np.array([x_right, 1.2 - i * 1.0, 0]))
                 t = Text(title, font=FONT_SANS, font_size=LABEL_SIZE + 2, color=THEME.recon_teal)
                 d = Text(desc, font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_muted)
-                t.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(UP * 0.1)
-                d.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(DOWN * 0.15)
+                t.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(UP * 0.15)
+                d.move_to(card.get_left() + RIGHT * 0.3, aligned_edge=LEFT).shift(DOWN * 0.2)
                 right_col.add(VGroup(card, t, d))
 
             # Column headers
@@ -685,9 +687,7 @@ else:
                 label.next_to(check_circle, RIGHT, buff=0.15)
 
                 row = VGroup(check_circle, label)
-                row.move_to(np.array([0, 1.8 - i * 0.45, 0]))
-                # Recenter label after positioning
-                label.next_to(check_circle, RIGHT, buff=0.15)
+                row.move_to(np.array([0, 1.8 - i * 0.40, 0]))
                 row_group.add(row)
 
             # Animate each row with checkmark

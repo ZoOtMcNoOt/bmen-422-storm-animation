@@ -85,8 +85,8 @@ if MANIM_AVAILABLE:
             ).to_edge(UP, buff=0.45)
 
             underline = Line(
-                title.get_left() + DOWN * 0.15,
-                title.get_right() + DOWN * 0.15,
+                title.get_left() + DOWN * 0.3,
+                title.get_right() + DOWN * 0.3,
                 color=accent_color,
                 stroke_width=3.5,
             )
@@ -172,7 +172,7 @@ if MANIM_AVAILABLE:
             pill.move_to(badge)
             grp = VGroup(pill, badge)
             grp.to_corner(DOWN + RIGHT, buff=0.35)
-            grp.shift(UP * 0.35)  # stay above progress bar
+            grp.shift(UP * 0.55)  # stay above progress bar
             self.add(grp)
             self._persistent.extend([pill, badge])
             return grp
