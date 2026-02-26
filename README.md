@@ -67,6 +67,12 @@ Present slides interactively:
 .\scripts\present.ps1
 ```
 
+If presentation startup fails with a `QtMultimedia` import error on Windows, install:
+
+```powershell
+conda install -n storm -c conda-forge qt6-multimedia
+```
+
 ## Testing
 
 ```powershell

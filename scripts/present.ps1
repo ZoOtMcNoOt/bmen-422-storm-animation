@@ -10,11 +10,24 @@ try {
     if (Test-Path $condaHook) { . $condaHook }
     conda activate storm
     $pythonExe = "python"
+    $env:QT_API = "pyside6"
 
     $tmpDir = Join-Path $repoRoot ".tmp"
     New-Item -ItemType Directory -Force $tmpDir | Out-Null
     $env:TEMP = $tmpDir
     $env:TMP = $tmpDir
+
+    # Manim Slides presenter imports qtpy.QtMultimedia. On conda-forge,
+    # this requires the qt6-multimedia runtime package in addition to pyside6.
+    cmd /c "$pythonExe -c ""from qtpy import QtMultimedia"" >nul 2>nul"
+    $qtMultimediaExitCode = $LASTEXITCODE
+    if ($qtMultimediaExitCode -ne 0) {
+        Write-Host "ERROR: QtMultimedia could not be loaded in the storm environment." -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Install the missing Qt runtime package and retry:" -ForegroundColor Yellow
+        Write-Host "  conda install -n storm -c conda-forge qt6-multimedia" -ForegroundColor Cyan
+        throw "Missing QtMultimedia runtime dependency."
+    }
 
     if (-not (Get-Command latex -ErrorAction SilentlyContinue)) {
         $miktexCandidates = @(
@@ -37,7 +50,7 @@ try {
     # Verify slides have been rendered
     $missingSlides = @()
     foreach ($scene in $scenes) {
-        $jsonPath = Join-Path $repoRoot "slides" "$scene.json"
+        $jsonPath = Join-Path -Path (Join-Path -Path $repoRoot -ChildPath "slides") -ChildPath "$scene.json"
         if (-not (Test-Path $jsonPath)) {
             $missingSlides += $scene
         }

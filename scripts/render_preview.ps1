@@ -10,6 +10,7 @@ try {
     if (Test-Path $condaHook) { . $condaHook }
     conda activate storm
     $pythonExe = "python"
+    $env:QT_API = "pyside6"
 
     $tmpDir = Join-Path $repoRoot ".tmp"
     New-Item -ItemType Directory -Force $tmpDir | Out-Null
