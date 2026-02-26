@@ -1,8 +1,9 @@
 """Instrumentation slides — 3Blue1Brown quality.
 
 Slides:
-  5. MicroscopeArchitectureSlide — ray-traced optical bench with animated beams
-  6. CameraStatisticsSlide       — photon counting, Poisson model, SNR
+  7. OpticalPathSlide       — ray-traced optical bench with animated beams
+  8. PhotoswitchingSlide    — Jablonski energy diagram
+  9. CameraStatisticsSlide  — photon counting, Poisson model, SNR
 """
 
 from __future__ import annotations
@@ -79,7 +80,10 @@ if MANIM_AVAILABLE:
 
 if not MANIM_AVAILABLE:
 
-    class MicroscopeArchitectureSlide(BaseStormSlide):
+    class OpticalPathSlide(BaseStormSlide):
+        pass
+
+    class PhotoswitchingSlide(BaseStormSlide):
         pass
 
     class CameraStatisticsSlide(BaseStormSlide):
@@ -88,15 +92,14 @@ if not MANIM_AVAILABLE:
 else:
 
     # ==================================================================
-    # 5.  Microscope Architecture  (3 : 00)
+    # 7.  Optical Path  (Scene A only from old MicroscopeArchitectureSlide)
     # ==================================================================
 
-    class MicroscopeArchitectureSlide(BaseStormSlide):
-        """Component-by-component light-path build with animated beams,
-        energy-level diagram for photoswitching, and TIRF angle detail."""
+    class OpticalPathSlide(BaseStormSlide):
+        """Component-by-component light-path build with animated beams."""
 
         def construct(self) -> None:
-            self.add_progress(5, TOTAL_SLIDES)
+            self.add_progress(7, TOTAL_SLIDES)
             self.add_chapter_header(
                 "Microscope & Hardware",
                 "Excitation · filtering · high-NA collection",
@@ -256,10 +259,23 @@ else:
                 camera.highlight_pixel(r, c, THEME.emission_green, 0.7)
             self.play(Indicate(camera, color=THEME.emission_green, scale_factor=1.05), run_time=0.5)
             self.play(FadeOut(narrator_em), run_time=0.2)
-            self.next_slide()
+            self.wait(0.5)
 
-            # --- Scene B: Photoswitching energy levels ---
-            self.fade_out_scene()
+    # ==================================================================
+    # 8.  Photoswitching  (Scene B from old MicroscopeArchitectureSlide)
+    # ==================================================================
+
+    class PhotoswitchingSlide(BaseStormSlide):
+        """Jablonski energy-level diagram with transition arrows and notes."""
+
+        def construct(self) -> None:
+            self.add_progress(8, TOTAL_SLIDES)
+            self.add_chapter_header(
+                "Photoswitching Mechanism",
+                "Fluorophore energy states control blinking",
+                accent_color=THEME.accent_instrument,
+            )
+            self.add_citations("[3][8][9]")
 
             energy_title = Text(
                 "Photo-switching: fluorophore energy states",
@@ -358,14 +374,14 @@ else:
             self.wait(0.5)
 
     # ==================================================================
-    # 6.  Camera Statistics  (2 : 00)
+    # 9.  Camera Statistics  (2 : 00)
     # ==================================================================
 
     class CameraStatisticsSlide(BaseStormSlide):
         """Photon counting animation, Poisson histogram, and SNR equation."""
 
         def construct(self) -> None:
-            self.add_progress(6, TOTAL_SLIDES)
+            self.add_progress(9, TOTAL_SLIDES)
             self.add_chapter_header(
                 "Camera Measurement Model",
                 "Poisson photon counting on pixel arrays",

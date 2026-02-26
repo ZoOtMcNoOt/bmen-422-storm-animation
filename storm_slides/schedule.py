@@ -4,13 +4,18 @@ from __future__ import annotations
 
 SLIDE_TIMINGS_SECONDS: list[tuple[str, int]] = [
     ("OpeningRoadmapSlide", 90),          # 1:30
-    ("MaxwellToHelmholtzSlide", 180),     # 3:00
-    ("FourierOpticsSlide", 180),          # 3:00
+    ("MaxwellToWaveSlide", 100),          # 1:40
+    ("HelmholtzWaveSlide", 80),           # 1:20
+    ("PupilFunctionSlide", 100),          # 1:40
+    ("PSFResolutionSlide", 80),           # 1:20
     ("TemporalSparsitySlide", 120),       # 2:00
-    ("MicroscopeArchitectureSlide", 180), # 3:00
+    ("OpticalPathSlide", 120),            # 2:00
+    ("PhotoswitchingSlide", 60),          # 1:00
     ("CameraStatisticsSlide", 120),       # 2:00
-    ("LocalizationAlgorithmSlide", 180),  # 3:00
-    ("SimulatorLabSlide", 240),           # 4:00
+    ("LocalizationPipelineSlide", 90),    # 1:30
+    ("GaussianFittingSlide", 90),         # 1:30
+    ("PhotonBudgetSweepSlide", 120),      # 2:00
+    ("DensityDriftSweepSlide", 120),      # 2:00
     ("ThreeDExtensionSlide", 90),         # 1:30
     ("BiologicalExamplesSlide", 90),      # 1:30
     ("LimitationsFrontierSlide", 90),     # 1:30

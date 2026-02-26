@@ -2,9 +2,11 @@
 
 Slides:
   1. OpeningRoadmapSlide   — animated pipeline with styled icons
-  2. MaxwellToHelmholtzSlide — step-by-step equation morphing derivation
-  3. FourierOpticsSlide     — pupil function, PSF broadening, resolution bound
-  4. TemporalSparsitySlide  — blinking fluorophores → sparse fitting demo
+  2. MaxwellToWaveSlide    — Maxwell curls → wave equation
+  3. HelmholtzWaveSlide    — Helmholtz eqn + travelling wave
+  4. PupilFunctionSlide    — wavefronts + frequency-domain pupil
+  5. PSFResolutionSlide    — PSF broadening + Abbe limit
+  6. TemporalSparsitySlide — blinking fluorophores → sparse fitting demo
 """
 
 from __future__ import annotations
@@ -84,10 +86,16 @@ if not MANIM_AVAILABLE:
     class OpeningRoadmapSlide(BaseStormSlide):
         pass
 
-    class MaxwellToHelmholtzSlide(BaseStormSlide):
+    class MaxwellToWaveSlide(BaseStormSlide):
         pass
 
-    class FourierOpticsSlide(BaseStormSlide):
+    class HelmholtzWaveSlide(BaseStormSlide):
+        pass
+
+    class PupilFunctionSlide(BaseStormSlide):
+        pass
+
+    class PSFResolutionSlide(BaseStormSlide):
         pass
 
     class TemporalSparsitySlide(BaseStormSlide):
@@ -183,16 +191,16 @@ else:
             self.wait(0.5)
 
     # ==================================================================
-    # 2.  Maxwell → Helmholtz  (3 : 00)
+    # 2.  Maxwell → Wave Equation  (Scenes A + B only)
     # ==================================================================
 
-    class MaxwellToHelmholtzSlide(BaseStormSlide):
-        """Step-by-step derivation with equation morphing and a travelling wave."""
+    class MaxwellToWaveSlide(BaseStormSlide):
+        """Maxwell curls → constitutive relations → wave equation with curvature highlights."""
 
         def construct(self) -> None:
             self.add_progress(2, TOTAL_SLIDES)
             self.add_chapter_header(
-                "From Maxwell to Helmholtz",
+                "From Maxwell to the Wave Equation",
                 "Dielectric medium  ·  monochromatic fields",
                 accent_color=THEME.accent_physics,
             )
@@ -273,15 +281,25 @@ else:
             label_temporal = Text("temporal curvature", font=FONT_SANS, font_size=LABEL_SIZE, color=THEME.accent_optics)
             label_temporal.next_to(box_time, DOWN, buff=0.12)
             self.play(FadeIn(label_spatial), FadeIn(label_temporal), run_time=0.5)
-            self.next_slide()
+            self.wait(0.5)
+
+    # ==================================================================
+    # 3.  Helmholtz & Travelling Wave  (old Scenes C + D)
+    # ==================================================================
+
+    class HelmholtzWaveSlide(BaseStormSlide):
+        """Helmholtz equation + wavenumber definition + travelling wave animation."""
+
+        def construct(self) -> None:
+            self.add_progress(3, TOTAL_SLIDES)
+            self.add_chapter_header(
+                "Helmholtz & Wave Propagation",
+                "Monochromatic solutions of the wave equation",
+                accent_color=THEME.accent_physics,
+            )
+            self.add_citations("[10]")
 
             # --- Scene C: Helmholtz equation ---
-            self.play(
-                FadeOut(wave_eq), FadeOut(box_laplacian), FadeOut(box_time),
-                FadeOut(label_spatial), FadeOut(label_temporal), FadeOut(assumptions),
-                run_time=0.5,
-            )
-
             narrator_c = self.add_narrator_note(
                 "The Helmholtz equation governs all monochromatic wave propagation.",
                 position="bottom",
@@ -358,17 +376,17 @@ else:
             self.wait(0.5)
 
     # ==================================================================
-    # 3.  Fourier Optics  (3 : 00)
+    # 4.  Pupil Function  (old Fourier Scenes A + B)
     # ==================================================================
 
-    class FourierOpticsSlide(BaseStormSlide):
-        """Pupil function, PSF broadening with ValueTracker, resolution bound."""
+    class PupilFunctionSlide(BaseStormSlide):
+        """Point-source wavefronts, frequency-domain pupil, blocked dots."""
 
         def construct(self) -> None:
-            self.add_progress(3, TOTAL_SLIDES)
+            self.add_progress(4, TOTAL_SLIDES)
             self.add_chapter_header(
-                "Fourier Optics & the Diffraction Limit",
-                "Finite NA truncates spatial frequencies → PSF broadens",
+                "Fourier Optics & the Pupil Function",
+                "Finite NA truncates spatial frequencies",
                 accent_color=THEME.accent_optics,
             )
             self.add_citations("[10]")
@@ -445,11 +463,25 @@ else:
                 font_size=30, color=THEME.text_primary,
             ).shift(RIGHT * 3.0 + UP * 0.5)
             self.play(Write(note), run_time=0.8)
-            self.next_slide()
+            self.wait(0.5)
+
+    # ==================================================================
+    # 5.  PSF & the Diffraction Limit  (old Fourier Scenes C + D)
+    # ==================================================================
+
+    class PSFResolutionSlide(BaseStormSlide):
+        """PSF broadening with NA ValueTracker, resolution equation + numerical."""
+
+        def construct(self) -> None:
+            self.add_progress(5, TOTAL_SLIDES)
+            self.add_chapter_header(
+                "PSF & the Diffraction Limit",
+                "Finite NA broadens the point spread function",
+                accent_color=THEME.accent_optics,
+            )
+            self.add_citations("[10]")
 
             # ---- Scene C: PSF broadening with NA ValueTracker ----
-            self.fade_out_scene()
-
             psf_title = Text(
                 "Point Spread Function widens as NA drops",
                 font=FONT_SANS,
@@ -545,14 +577,14 @@ else:
             self.wait(0.5)
 
     # ==================================================================
-    # 4.  Temporal Sparsity  (2 : 00)
+    # 6.  Temporal Sparsity  (2 : 00)
     # ==================================================================
 
     class TemporalSparsitySlide(BaseStormSlide):
         """Dense overlap vs sparse blinking — animated fluorophore field."""
 
         def construct(self) -> None:
-            self.add_progress(4, TOTAL_SLIDES)
+            self.add_progress(6, TOTAL_SLIDES)
             self.add_chapter_header(
                 "Temporal Sparsity Enables STORM",
                 "Few emitters per frame → single-PSF fitting",

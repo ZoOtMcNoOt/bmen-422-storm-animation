@@ -75,4 +75,4 @@ LABEL_SIZE = 18
 DEFAULT_RUN_TIME = 1.0               # base run_time for standard animations
 FAST_RUN_TIME = 0.5                  # quick transitions
 SLOW_RUN_TIME = 2.0                  # dramatic reveals
-TOTAL_SLIDES = 12
+TOTAL_SLIDES = 17

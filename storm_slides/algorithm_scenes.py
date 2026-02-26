@@ -1,12 +1,14 @@
 """Algorithm, simulation, and wrap-up slides — 3Blue1Brown quality.
 
 Slides:
-   7.  LocalizationAlgorithmSlide  — detection → MLE fitting → precision → aggregation
-   8.  SimulatorLabSlide           — live Monte Carlo sweeps with bar charts
-   9.  ThreeDExtensionSlide        — astigmatic PSF ellipse morphing
-  10.  BiologicalExamplesSlide     — diffraction-limited vs STORM side-by-side
-  11.  LimitationsFrontierSlide    — animated vignettes
-  12.  ConclusionChecklistSlide    — animated checklist with check marks
+  10.  LocalizationPipelineSlide  — 4-box pipeline overview
+  11.  GaussianFittingSlide       — MLE fitting + precision equation
+  12.  PhotonBudgetSweepSlide     — photon budget bar chart
+  13.  DensityDriftSweepSlide     — density + drift bar charts + summary
+  14.  ThreeDExtensionSlide       — astigmatic PSF ellipse morphing
+  15.  BiologicalExamplesSlide    — diffraction-limited vs STORM side-by-side
+  16.  LimitationsFrontierSlide   — animated vignettes
+  17.  ConclusionChecklistSlide   — animated checklist with check marks
 """
 
 from __future__ import annotations
@@ -89,10 +91,16 @@ if MANIM_AVAILABLE:
 
 if not MANIM_AVAILABLE:
 
-    class LocalizationAlgorithmSlide(BaseStormSlide):
+    class LocalizationPipelineSlide(BaseStormSlide):
         pass
 
-    class SimulatorLabSlide(BaseStormSlide):
+    class GaussianFittingSlide(BaseStormSlide):
+        pass
+
+    class PhotonBudgetSweepSlide(BaseStormSlide):
+        pass
+
+    class DensityDriftSweepSlide(BaseStormSlide):
         pass
 
     class ThreeDExtensionSlide(BaseStormSlide):
@@ -110,14 +118,14 @@ if not MANIM_AVAILABLE:
 else:
 
     # ==================================================================
-    # 7.  Localization Algorithm  (3 : 00)
+    # 10.  Localization Pipeline  (Scene A only)
     # ==================================================================
 
-    class LocalizationAlgorithmSlide(BaseStormSlide):
-        """4-stage pipeline walkthrough with animated fitting."""
+    class LocalizationPipelineSlide(BaseStormSlide):
+        """4-stage pipeline walkthrough."""
 
         def construct(self) -> None:
-            self.add_progress(7, TOTAL_SLIDES)
+            self.add_progress(10, TOTAL_SLIDES)
             self.add_chapter_header(
                 "Localization Pipeline",
                 "From raw frame to super-resolved coordinates",
@@ -183,10 +191,24 @@ else:
                     anims.append(Create(arrows[i - 1]))
                 self.play(*anims, run_time=0.55)
 
-            self.next_slide()
+            self.wait(0.3)
 
-            # --- Scene B: Gaussian fitting illustration ---
-            self.fade_out_scene()
+    # ==================================================================
+    # 11.  Gaussian MLE Fitting  (old Scene B from LocalizationAlgorithmSlide)
+    # ==================================================================
+
+    class GaussianFittingSlide(BaseStormSlide):
+        """Pixel patch grid, fit arrow, Gaussian contour + crosshairs,
+        σ_PSF/center labels, precision equation + key insight note."""
+
+        def construct(self) -> None:
+            self.add_progress(11, TOTAL_SLIDES)
+            self.add_chapter_header(
+                "Gaussian MLE Fitting",
+                "From raw pixel patch to nanometre coordinates",
+                accent_color=THEME.accent_algorithm,
+            )
+            self.add_citations("[5][6][7]")
 
             fit_title = Text(
                 "Gaussian MLE Fitting",
@@ -282,53 +304,133 @@ else:
             self.wait(0.3)
 
     # ==================================================================
-    # 8.  Simulator Lab  (4 : 00)
+    # 12.  Photon Budget Sweep  (first sweep from old SimulatorLabSlide)
     # ==================================================================
 
-    class SimulatorLabSlide(BaseStormSlide):
-        """Monte Carlo STORM simulator with live bar-chart sweeps."""
+    class PhotonBudgetSweepSlide(BaseStormSlide):
+        """Single photon-budget bar chart, centered for better visibility."""
 
-        # Pre-computed sweep results to avoid expensive computation at render.
-        # Photon budget sweep: [200, 400, 800] photons/frame
+        # Pre-computed sweep results
         _PHOTON_RMSE = [42.0, 24.5, 14.2]
         _PHOTON_LABELS = ["200", "400", "800"]
-        # Density sweep: [20, 60, 120] emitters
-        _DENSITY_RMSE = [11.5, 18.3, 35.7]
-        _DENSITY_LABELS = ["20", "60", "120"]
-        # Drift sweep: [0.0, 0.5, 2.0] nm/frame
-        _DRIFT_RMSE = [14.0, 19.8, 31.4]
-        _DRIFT_LABELS = ["0.0", "0.5", "2.0"]
 
         def construct(self) -> None:
-            self.add_progress(8, TOTAL_SLIDES)
+            self.add_progress(12, TOTAL_SLIDES)
             self.add_chapter_header(
-                "Monte Carlo Simulator",
-                "Three parameter sweeps from our simulator",
+                "Simulator: Photon Budget Sweep",
+                "How photon count drives localisation precision",
                 accent_color=THEME.recon_teal,
             )
             self.add_citations("[1][3][11]")
 
-            # --- Three bar charts side by side ---
+            color = THEME.accent_optics
+            x_c = 0.0
+            y_base = -1.0
+
+            # Title
+            chart_title = Text(
+                "Photon Budget (γ/frame)",
+                font=FONT_SANS, font_size=LABEL_SIZE + 2, color=color,
+            )
+            chart_title.move_to(np.array([x_c, 1.5, 0]))
+
+            # Bars — wider since we have full width
+            max_rmse = 45.0
+            bar_width = 0.70
+            bars = VGroup()
+            value_labels = VGroup()
+            x_labels_grp = VGroup()
+            for i, (lbl, val) in enumerate(zip(self._PHOTON_LABELS, self._PHOTON_RMSE)):
+                bar_h = val / max_rmse * 2.5
+                bar = Rectangle(
+                    width=bar_width, height=bar_h,
+                    fill_color=color, fill_opacity=0.7,
+                    stroke_width=0.5, stroke_color=THEME.text_muted,
+                )
+                bar_x = x_c + (i - 1) * 1.5
+                bar.move_to(np.array([bar_x, y_base + bar_h / 2, 0]))
+                bars.add(bar)
+
+                vl = Text(f"{val:.1f}", font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_primary)
+                vl.next_to(bar, UP, buff=0.06)
+                value_labels.add(vl)
+
+                xl = Text(lbl, font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_muted)
+                xl.next_to(bar, DOWN, buff=0.06)
+                x_labels_grp.add(xl)
+
+            y_label = Text("RMSE (nm)", font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_muted)
+            y_label.rotate(PI / 2)
+            y_label.move_to(np.array([x_c - 2.0, y_base + 1.0, 0]))
+
+            # Animate
+            self.play(FadeIn(chart_title), FadeIn(y_label), run_time=0.3)
+            self.play(
+                LaggedStart(*[GrowFromEdge(b, DOWN) for b in bars], lag_ratio=0.12),
+                run_time=0.8,
+            )
+            self.play(FadeIn(value_labels), FadeIn(x_labels_grp), run_time=0.3)
+
+            # Photon insight
+            insight_note = Text(
+                "4× more photons ≈ halves localisation error",
+                font=FONT_SANS, font_size=LABEL_SIZE - 1,
+                color=THEME.text_muted, slant="ITALIC",
+            ).to_edge(DOWN, buff=1.0)
+            self.play(FadeIn(insight_note, shift=UP * 0.08), run_time=0.35)
+
+            self.next_slide()
+
+            # Conclusion note
+            self.play(FadeOut(insight_note), run_time=0.2)
+            conclusion = Text(
+                "Photon budget is the dominant factor — optimise laser power & dye brightness first.",
+                font=FONT_SANS,
+                font_size=CAPTION_SIZE,
+                color=THEME.text_muted,
+                line_spacing=0.9,
+            ).to_edge(DOWN, buff=0.6)
+            self.play(FadeIn(conclusion, shift=UP * 0.1), run_time=0.6)
+            self.wait(0.5)
+
+    # ==================================================================
+    # 13.  Density & Drift Sweeps  (sweeps 2+3 from old SimulatorLabSlide)
+    # ==================================================================
+
+    class DensityDriftSweepSlide(BaseStormSlide):
+        """Side-by-side density and drift bar charts."""
+
+        _DENSITY_RMSE = [11.5, 18.3, 35.7]
+        _DENSITY_LABELS = ["20", "60", "120"]
+        _DRIFT_RMSE = [14.0, 19.8, 31.4]
+        _DRIFT_LABELS = ["0.0", "0.5", "2.0"]
+
+        def construct(self) -> None:
+            self.add_progress(13, TOTAL_SLIDES)
+            self.add_chapter_header(
+                "Simulator: Density & Drift Sweeps",
+                "How emitter density and stage drift affect RMSE",
+                accent_color=THEME.recon_teal,
+            )
+            self.add_citations("[1][3][11]")
+
             sweep_data = [
-                ("Photon Budget (γ/frame)", self._PHOTON_LABELS, self._PHOTON_RMSE, THEME.accent_optics),
                 ("Emitter Density (N)", self._DENSITY_LABELS, self._DENSITY_RMSE, THEME.accent_alert),
                 ("Drift (nm/frame)", self._DRIFT_LABELS, self._DRIFT_RMSE, THEME.accent_algorithm),
             ]
 
             chart_groups = VGroup()
-            x_centers = [-3.8, 0.0, 3.8]
+            x_centers = [-3.0, 3.0]
 
             for idx, (title, xlabels, rmse_vals, color) in enumerate(sweep_data):
                 x_c = x_centers[idx]
                 y_base = -1.0
 
-                # Title
                 chart_title = Text(title, font=FONT_SANS, font_size=LABEL_SIZE + 2, color=color)
                 chart_title.move_to(np.array([x_c, 1.5, 0]))
 
-                # Bars
                 max_rmse = 45.0
-                bar_width = 0.50
+                bar_width = 0.55
                 bars = VGroup()
                 value_labels = VGroup()
                 x_labels_grp = VGroup()
@@ -343,17 +445,14 @@ else:
                     bar.move_to(np.array([bar_x, y_base + bar_h / 2, 0]))
                     bars.add(bar)
 
-                    # Value on top
                     vl = Text(f"{val:.1f}", font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_primary)
                     vl.next_to(bar, UP, buff=0.06)
                     value_labels.add(vl)
 
-                    # x-axis label
                     xl = Text(lbl, font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_muted)
                     xl.next_to(bar, DOWN, buff=0.06)
                     x_labels_grp.add(xl)
 
-                # y-axis label
                 y_label = Text("RMSE (nm)", font=FONT_SANS, font_size=LABEL_SIZE - 2, color=THEME.text_muted)
                 y_label.rotate(PI / 2)
                 y_label.move_to(np.array([x_c - 1.45, y_base + 1.0, 0]))
@@ -361,9 +460,7 @@ else:
                 chart_group = VGroup(chart_title, bars, value_labels, x_labels_grp, y_label)
                 chart_groups.add(chart_group)
 
-            # Per-chart takeaway texts
             chart_insights = [
-                "4× more photons ≈ halves localisation error",
                 "High density causes PSF overlap → false localisations",
                 "Even 0.5 nm/frame drift degrades RMSE by ~40 %",
             ]
@@ -384,7 +481,6 @@ else:
                 )
                 self.play(FadeIn(vals_mob), FadeIn(xlabs_mob), run_time=0.3)
 
-                # Per-chart narrator insight
                 insight_note = Text(
                     chart_insights[i],
                     font=FONT_SANS, font_size=LABEL_SIZE - 1,
@@ -397,11 +493,10 @@ else:
 
             self.next_slide()
 
-            # Final insight
+            # Final consolidated insight
             if prev_insight is not None:
                 self.play(FadeOut(prev_insight), run_time=0.2)
             insight = Text(
-                "Photon budget is the dominant factor — optimise laser power & dye brightness first.\n"
                 "Correct drift with fiducial markers; keep density below overlap threshold.",
                 font=FONT_SANS,
                 font_size=CAPTION_SIZE,
@@ -412,14 +507,14 @@ else:
             self.wait(0.5)
 
     # ==================================================================
-    # 9.  3D Extension  (1 : 30)
+    # 14.  3D Extension  (1 : 30)
     # ==================================================================
 
     class ThreeDExtensionSlide(BaseStormSlide):
         """Astigmatic PSF: ellipses morph with z, calibration curve."""
 
         def construct(self) -> None:
-            self.add_progress(9, TOTAL_SLIDES)
+            self.add_progress(14, TOTAL_SLIDES)
             self.add_chapter_header(
                 "3D STORM via Astigmatism",
                 "Cylindrical lens encodes z into PSF ellipticity",
@@ -536,14 +631,14 @@ else:
             self.wait(0.4)
 
     # ==================================================================
-    # 10. Biological Examples  (1 : 30)
+    # 15. Biological Examples  (1 : 30)
     # ==================================================================
 
     class BiologicalExamplesSlide(BaseStormSlide):
         """Side-by-side: diffraction-limited vs STORM reconstruction."""
 
         def construct(self) -> None:
-            self.add_progress(10, TOTAL_SLIDES)
+            self.add_progress(15, TOTAL_SLIDES)
             self.add_chapter_header(
                 "Biological Applications",
                 "What STORM reveals that conventional microscopy cannot",
@@ -678,14 +773,14 @@ else:
             self.wait(0.3)
 
     # ==================================================================
-    # 11. Limitations & Frontier  (1 : 30)
+    # 16. Limitations & Frontier  (1 : 30)
     # ==================================================================
 
     class LimitationsFrontierSlide(BaseStormSlide):
         """Two-column: current limits vs active research — animated cards."""
 
         def construct(self) -> None:
-            self.add_progress(11, TOTAL_SLIDES)
+            self.add_progress(16, TOTAL_SLIDES)
             self.add_chapter_header(
                 "Limitations & Frontier",
                 "Where STORM pipelines struggle and where they're heading",
@@ -760,14 +855,14 @@ else:
             self.wait(0.4)
 
     # ==================================================================
-    # 12. Conclusion Checklist  (1 : 00)
+    # 17. Conclusion Checklist  (1 : 00)
     # ==================================================================
 
     class ConclusionChecklistSlide(BaseStormSlide):
         """Animated checklist with green checkmarks appearing one-by-one."""
 
         def construct(self) -> None:
-            self.add_progress(12, TOTAL_SLIDES)
+            self.add_progress(17, TOTAL_SLIDES)
             self.add_chapter_header(
                 "End-to-End Coverage",
                 "Everything demonstrated in this presentation",

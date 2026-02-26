@@ -18,4 +18,4 @@ def test_timing_contract_is_within_target_window() -> None:
 def test_scene_order_matches_timing_contract() -> None:
     timing_scene_names = [name for name, _ in SLIDE_TIMINGS_SECONDS]
     assert timing_scene_names == SCENE_NAME_ORDER
-    assert len(SCENE_NAME_ORDER) == 12
+    assert len(SCENE_NAME_ORDER) == 17

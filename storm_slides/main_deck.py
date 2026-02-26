@@ -5,19 +5,24 @@ from __future__ import annotations
 from storm_slides.algorithm_scenes import (
     BiologicalExamplesSlide as _BiologicalExamplesSlide,
     ConclusionChecklistSlide as _ConclusionChecklistSlide,
+    DensityDriftSweepSlide as _DensityDriftSweepSlide,
+    GaussianFittingSlide as _GaussianFittingSlide,
     LimitationsFrontierSlide as _LimitationsFrontierSlide,
-    LocalizationAlgorithmSlide as _LocalizationAlgorithmSlide,
-    SimulatorLabSlide as _SimulatorLabSlide,
+    LocalizationPipelineSlide as _LocalizationPipelineSlide,
+    PhotonBudgetSweepSlide as _PhotonBudgetSweepSlide,
     ThreeDExtensionSlide as _ThreeDExtensionSlide,
 )
 from storm_slides.instrument_scenes import (
     CameraStatisticsSlide as _CameraStatisticsSlide,
-    MicroscopeArchitectureSlide as _MicroscopeArchitectureSlide,
+    OpticalPathSlide as _OpticalPathSlide,
+    PhotoswitchingSlide as _PhotoswitchingSlide,
 )
 from storm_slides.physics_scenes import (
-    FourierOpticsSlide as _FourierOpticsSlide,
-    MaxwellToHelmholtzSlide as _MaxwellToHelmholtzSlide,
+    HelmholtzWaveSlide as _HelmholtzWaveSlide,
+    MaxwellToWaveSlide as _MaxwellToWaveSlide,
     OpeningRoadmapSlide as _OpeningRoadmapSlide,
+    PSFResolutionSlide as _PSFResolutionSlide,
+    PupilFunctionSlide as _PupilFunctionSlide,
     TemporalSparsitySlide as _TemporalSparsitySlide,
 )
 
@@ -26,11 +31,19 @@ class OpeningRoadmapSlide(_OpeningRoadmapSlide):
     pass
 
 
-class MaxwellToHelmholtzSlide(_MaxwellToHelmholtzSlide):
+class MaxwellToWaveSlide(_MaxwellToWaveSlide):
     pass
 
 
-class FourierOpticsSlide(_FourierOpticsSlide):
+class HelmholtzWaveSlide(_HelmholtzWaveSlide):
+    pass
+
+
+class PupilFunctionSlide(_PupilFunctionSlide):
+    pass
+
+
+class PSFResolutionSlide(_PSFResolutionSlide):
     pass
 
 
@@ -38,7 +51,11 @@ class TemporalSparsitySlide(_TemporalSparsitySlide):
     pass
 
 
-class MicroscopeArchitectureSlide(_MicroscopeArchitectureSlide):
+class OpticalPathSlide(_OpticalPathSlide):
+    pass
+
+
+class PhotoswitchingSlide(_PhotoswitchingSlide):
     pass
 
 
@@ -46,11 +63,19 @@ class CameraStatisticsSlide(_CameraStatisticsSlide):
     pass
 
 
-class LocalizationAlgorithmSlide(_LocalizationAlgorithmSlide):
+class LocalizationPipelineSlide(_LocalizationPipelineSlide):
     pass
 
 
-class SimulatorLabSlide(_SimulatorLabSlide):
+class GaussianFittingSlide(_GaussianFittingSlide):
+    pass
+
+
+class PhotonBudgetSweepSlide(_PhotonBudgetSweepSlide):
+    pass
+
+
+class DensityDriftSweepSlide(_DensityDriftSweepSlide):
     pass
 
 
@@ -71,13 +96,18 @@ class ConclusionChecklistSlide(_ConclusionChecklistSlide):
 
 DECK_SCENES = [
     OpeningRoadmapSlide,
-    MaxwellToHelmholtzSlide,
-    FourierOpticsSlide,
+    MaxwellToWaveSlide,
+    HelmholtzWaveSlide,
+    PupilFunctionSlide,
+    PSFResolutionSlide,
     TemporalSparsitySlide,
-    MicroscopeArchitectureSlide,
+    OpticalPathSlide,
+    PhotoswitchingSlide,
     CameraStatisticsSlide,
-    LocalizationAlgorithmSlide,
-    SimulatorLabSlide,
+    LocalizationPipelineSlide,
+    GaussianFittingSlide,
+    PhotonBudgetSweepSlide,
+    DensityDriftSweepSlide,
     ThreeDExtensionSlide,
     BiologicalExamplesSlide,
     LimitationsFrontierSlide,
